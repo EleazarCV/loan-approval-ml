@@ -1,6 +1,6 @@
 # Loan Approval Classification – Modelo de Regresión Logística
 
-Este proyecto tiene como objetivo analizar una base de datos de solicitudes de préstamo y construir un modelo de clasificación que nos permita predecir si un préstamo será aprobado o no.  
+Este proyecto analiza una base de datos de solicitudes de préstamo y construye un modelo de clasificación para predecir si un préstamo será aprobado o no.  
 El flujo completo incluye: exploración de datos, limpieza, codificación, modelado, evaluación y análisis de las variables más importantes.
 
 El dataset utilizado proviene de Kaggle: *Loan Approval Dataset*.
@@ -11,48 +11,47 @@ El dataset utilizado proviene de Kaggle: *Loan Approval Dataset*.
 
 El objetivo principal es estimar la probabilidad:
 
-\[
-P(\text{loan\_approved} = 1 \mid X)
-\]
+$$P(\text{loan\_approved} = 1 \mid X)$$
 
-donde \( X \) representa variables como:
+donde $X$ representa variables como:
 
 - income  
 - credit_score  
 - loan_amount  
 - years_employed  
 - points  
-- city (codificada mediante one-hot encoding)
+- name y city (codificadas mediante one-hot encoding)
 
-Este modelo nos ayuda a entender qué factores influyen más en la aprobación de un préstamo y nos permite predecir el resultado de nuevas solicitudes.
+Este modelo ayuda a entender qué factores influyen más en la aprobación de un préstamo y permite predecir el resultado de nuevas solicitudes.
 
 ---
 
 ## 📂 Estructura del proyecto
-
+```
 loan-approval-ml/
 │
 ├── data/
-│ └── raw/ # Archivo original .csv del dataset
+│   └── raw/                        # Archivo original .csv del dataset
 │
 ├── notebooks/
-│ └── loan_approval_model.ipynb # Notebook principal con todo el análisis
+│   └── loan_approval_model.ipynb   # Notebook principal con todo el análisis
 │
 ├── src/
-│ └── utils.py # Funciones auxiliares (si se requieren)
+│   └── model.py                    # Pipeline completo del modelo
 │
-├── README.md # Este archivo
-└── requirements.txt # Librerías necesarias
-
+├── README.md                       # Este archivo
+└── requirements.txt                # Librerías necesarias
+```
 
 ---
 
 ## 🔍 Exploración y preparación de datos
 
 - Se revisaron tipos de variables, valores faltantes y estadísticas básicas.  
-- Se identificaron columnas numéricas y categóricas.  
-- La variable `city` se convirtió a variables dummy usando **one-hot encoding**, generando más de 1800 columnas.  
-- La variable objetivo `loan_approved` se convirtió a 0/1 para ser compatible con el modelo.
+- Se identificaron columnas numéricas (`income`, `credit_score`, `loan_amount`, `years_employed`, `points`) y categóricas (`name`, `city`).  
+- Las variables `name` y `city` se codificaron con **one-hot encoding**.  
+- La variable objetivo `loan_approved` originalmente es booleana (`True/False`) y se trató directamente como categórica binaria.
+- Se aplicó **StandardScaler** para normalizar las variables numéricas antes del entrenamiento.
 
 ---
 
@@ -60,22 +59,18 @@ loan-approval-ml/
 
 La Regresión Logística se eligió porque:
 
-- Nos permite predecir probabilidades.  
+- Permite predecir probabilidades entre 0 y 1.  
 - Es fácil de interpretar mediante coeficientes.  
 - Funciona bien con datos categóricos codificados.  
-- Es un modelo rápido y estable.
+- Es un modelo rápido, estable y apropiado como baseline.
 
 El modelo aprende una combinación lineal:
 
-\[
-z = b_0 + b_1 x_1 + \dots + b_n x_n
-\]
+$$z = b_0 + b_1 x_1 + \dots + b_n x_n$$
 
-y luego aplica la función sigmoide:
+y aplica la función sigmoide:
 
-\[
-\sigma(z) = \frac{1}{1 + e^{-z}}
-\]
+$$\sigma(z) = \frac{1}{1 + e^{-z}}$$
 
 para transformar ese valor en una probabilidad entre 0 y 1.
 
@@ -83,56 +78,71 @@ para transformar ese valor en una probabilidad entre 0 y 1.
 
 ## 📊 Resultados del modelo
 
-El modelo alcanzó métricas perfectas en el conjunto de prueba:
+El modelo fue evaluado en un conjunto de prueba de 400 registros (split 80/20 estratificado):
 
-- **Accuracy : 1.0000**  
-- **Precision: 1.0000**  
-- **Recall   : 1.0000**  
-- **F1-score : 1.0000**
+| Métrica    | Valor  |
+|------------|--------|
+| Accuracy   | 0.9300 |
+| Precision  | 0.9744 |
+| Recall     | 0.8636 |
+| F1-Score   | 0.9157 |
+| **ROC-AUC**| **0.9888** |
 
-Además, la matriz de confusión muestra que el modelo clasificó correctamente el 100 % de los casos.
-
-Estos resultados indican que la variable `points` tiene un poder predictivo muy fuerte y prácticamente determina la aprobación del préstamo.
+La curva ROC con AUC = 0.9888 indica que el modelo discrimina muy bien entre préstamos aprobados y rechazados.
 
 ---
 
 ## 📈 Importancia de las variables
 
-Se analizaron los coeficientes de la Regresión Logística:
+Los coeficientes de la regresión logística revelan qué variables tienen mayor influencia:
 
-- **`points`** es la variable más influyente del modelo.  
-- Las variables `city_...` (resultado del one-hot encoding) muestran coeficientes muy pequeños.  
-- Variables numéricas como income y credit_score tienen influencia, pero menor comparada con `points`.
+| Variable      | Coeficiente | Efecto |
+|---------------|-------------|--------|
+| `points`      | +1.51       | Mayor score → más probabilidad de aprobación |
+| `credit_score`| +1.27       | Mejor historial crediticio → favorece la aprobación |
+| `income`      | +0.33       | Mayor ingreso → efecto positivo |
+| `loan_amount` | -0.26       | Mayor monto solicitado → reduce probabilidad |
+| `years_employed` | +0.11    | Más antigüedad laboral → efecto positivo |
+
+### 🔍 Análisis sin la variable `points`
+
+Al eliminar `points` (que actúa como score interno derivado del target), el modelo con solo variables financieras reales mantiene métricas sólidas:
+
+| Métrica   | Con `points` | Sin `points` |
+|-----------|-------------|--------------|
+| Accuracy  | 0.9300      | 0.8775       |
+| F1-Score  | 0.9157      | 0.8444       |
+| ROC-AUC   | 0.9888      | 0.9611       |
+
+Esto confirma que **`credit_score`, `income` y `loan_amount` tienen poder predictivo real**, independientemente del score interno.
 
 ---
 
 ## ⚠️ Limitaciones del dataset
 
-- La variable `points` contiene información casi determinística sobre la aprobación.
-- La columna `city` genera cientos de variables dummy con poco valor.
-- El problema es demasiado “perfecto”, lo cual no refleja un escenario real.
+- La variable `points` contiene información casi determinística sobre la aprobación.  
+- Las columnas `name` y `city` generan cientos de variables dummy con poco valor predictivo real.  
+- El dataset es sintético, lo cual no refleja completamente un escenario productivo.
 
-Aun así, el dataset funciona bien para aprender el flujo completo de un proyecto de clasificación.
+Aun así, funciona bien para demostrar un flujo completo de clasificación crediticia.
 
 ---
 
 ## 🚀 Posibles mejoras futuras
 
-- Entrenar modelos como Random Forest, XGBoost o Árboles de Decisión.  
-- Analizar el modelo eliminando `points` para ver si las variables financieras predicen por sí solas.  
-- Reducir dimensionalidad eliminando ciudades raras con baja frecuencia.  
-- Probar técnicas de regularización como L1/Lasso.
+- Entrenar modelos como **Random Forest**, **XGBoost** o **Árboles de Decisión**.  
+- Aplicar **regularización L1 (Lasso)** para selección automática de variables.  
+- Reducir dimensionalidad agrupando ciudades con baja frecuencia.  
+- Evaluar con **validación cruzada k-fold** para mayor robustez.  
+- Eliminar variables de baja utilidad (`name`, `city`) y reentrenar.
 
 ---
 
 ## 🛠 Librerías utilizadas
-
+```
 pandas
 numpy
 matplotlib
 seaborn
 scikit-learn
-
----
-
-Este proyecto forma parte de mi portafolio personal, mostrando un flujo completo de análisis de datos y modelado aplicado a problemas de clasificación.
+```
