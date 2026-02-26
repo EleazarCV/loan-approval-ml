@@ -7,13 +7,10 @@ El dataset utilizado proviene de Kaggle: *Loan Approval Dataset*.
 
 ---
 
-## 📌 Objetivo del proyecto
+## Objetivo del proyecto
 
-El objetivo principal es estimar la probabilidad:
-
-$$P(\text{loan\_approved} = 1 \mid X)$$
-
-donde $X$ representa variables como:
+El objetivo principal es estimar la probabilidad de aprobación `P(loan_approved = 1 | X)`,
+donde `X` representa variables como:
 
 - income  
 - credit_score  
@@ -26,7 +23,7 @@ Este modelo ayuda a entender qué factores influyen más en la aprobación de un
 
 ---
 
-## 📂 Estructura del proyecto
+## Estructura del proyecto
 ```
 loan-approval-ml/
 │
@@ -45,7 +42,7 @@ loan-approval-ml/
 
 ---
 
-## 🔍 Exploración y preparación de datos
+## Exploración y preparación de datos
 
 - Se revisaron tipos de variables, valores faltantes y estadísticas básicas.  
 - Se identificaron columnas numéricas (`income`, `credit_score`, `loan_amount`, `years_employed`, `points`) y categóricas (`name`, `city`).  
@@ -55,7 +52,7 @@ loan-approval-ml/
 
 ---
 
-## 🤖 Modelo utilizado: Regresión Logística
+## Modelo utilizado: Regresión Logística
 
 La Regresión Logística se eligió porque:
 
@@ -76,7 +73,7 @@ para transformar ese valor en una probabilidad entre 0 y 1.
 
 ---
 
-## 📊 Resultados del modelo
+## Resultados del modelo
 
 El modelo fue evaluado en un conjunto de prueba de 400 registros (split 80/20 estratificado):
 
@@ -92,7 +89,7 @@ La curva ROC con AUC = 0.9888 indica que el modelo discrimina muy bien entre pr�
 
 ---
 
-## 📈 Importancia de las variables
+## Importancia de las variables
 
 Los coeficientes de la regresión logística revelan qué variables tienen mayor influencia:
 
@@ -118,7 +115,7 @@ Esto confirma que **`credit_score`, `income` y `loan_amount` tienen poder predic
 
 ---
 
-## ⚠️ Limitaciones del dataset
+##Limitaciones del dataset
 
 - La variable `points` contiene información casi determinística sobre la aprobación.  
 - Las columnas `name` y `city` generan cientos de variables dummy con poco valor predictivo real.  
@@ -128,7 +125,7 @@ Aun así, funciona bien para demostrar un flujo completo de clasificación credi
 
 ---
 
-## 🚀 Posibles mejoras futuras
+##Posibles mejoras futuras
 
 - Entrenar modelos como **Random Forest**, **XGBoost** o **Árboles de Decisión**.  
 - Aplicar **regularización L1 (Lasso)** para selección automática de variables.  
